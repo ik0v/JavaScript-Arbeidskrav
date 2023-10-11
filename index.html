@@ -77,61 +77,101 @@
         var julia = document.getElementById("julia-the-archer");
         var cat = document.getElementById("the-cat");
         var boss = document.getElementById("big-boss");
-
-        var bossHp = 300;
-
-
+        var monster = document.getElementById("appearing-monster");
+        
         var knightHpBar = document.getElementById("nameless-knight-hp-div");
         var juliaHpBar = document.getElementById("julia-the-archer-hp-div");
         var catHpBar = document.getElementById("the-cat-hp-div");
         var bossHpBar = document.getElementById("big-boss-hp-div");
-    
+
+        var bossHp = 300;
+        var hasMonster = false;
+
+        var heroeNames = ["NamelessKnight", "Julia the archer", "The Cat"]
+        var heroeHps = [200,200,200]; // lagrer hp til heltene i array. 
+        var heroeHpBars = [knightHpBar, juliaHpBar, catHpBar]; // lagrer variabler som peker til helter hp bar i array 
 
         namelessKnight.onclick = function() {
             attackMonsterKnight();
+            setTimeout(function() {
+                bossAttackBack();
+            }, 500);
         }
 
         julia.onclick = function() {
             attackMonsterJulia();
+            setTimeout(function() {
+                bossAttackBack();
+            }, 500);
         }
 
         cat.onclick = function() {
             attackMonsterCat();
+            setTimeout(function() {
+                bossAttackBack();
+            }, 500);
         }
 
         function attackMonsterKnight() {
-            var damage = Math.floor(Math.random() * 40);
-            console.log(damage);
+            summonMonster();           // Vi får true hvis monster fantes fra før eller ble tilkalt.  Ellers får vi false. Det kan vi bruke senere i kode
+            var damage = Math.floor(Math.random() * 15) + 10;   
             bossHp -= damage;
             bossHpBar.style.width = `${bossHp}px`;
-            describeAction("knight", damage);
+            describeAction(heroeNames[0], damage, "bigBoss");
         }
 
         function attackMonsterJulia() {
-            var damage = Math.floor(Math.random() * 30);
-            console.log(damage);
+            summonMonster();            // Vi får true hvis monster fantes fra før eller ble tilkalt. Ellers får vi false. Det kan vi bruke senere i kode
+            var damage = Math.floor(Math.random() * 15) + 5;
             bossHp -= damage;
             bossHpBar.style.width = `${bossHp}px`;
-            describeAction("julia", damage);
+            describeAction(heroeNames[1], damage, "bigBoss");
         }
 
         function attackMonsterCat() {
-            var damage = Math.floor(Math.random() * 25);
-            console.log(damage);
+            summonMonster();            // Vi får true hvis monster fantes fra før eller ble tilkalt. Ellers får vi false. Det kan vi bruke senere i kode
+            var damage = Math.floor(Math.random() * 26) + 3;
             bossHp -= damage;
             bossHpBar.style.width = `${bossHp}px`;
-            describeAction("cat", damage);
+            describeAction(heroeNames[2], damage, "bigBoss");
         }
 
-        function describeAction(attacker, damage) {
-            statusTxt.innerHTML = `${attacker} angrep bigBoss og gjorde ${damage} hp skade.`
+        function summonMonster() {
+            if (monster.getAttribute('src') === '') {
+                var chance = Math.random()
+                if (chance > 0.75) {
+                    console.log(`${chance}`);
+                    monster.src = getMonsterName();
+                    return true;
+                }
+                console.log(`${chance}`);
+            }   
+            return false;
         }
 
+        function getMonsterName() {
+            var chance = Math.random()
+            console.log(chance);
+            if (chance > 0.5) return "images/bat.png"
+            else return "images/slime.png"
+        }
 
+        function bossAttackBack() {
+            var j = Math.floor(Math.random() * 3); // Velger hvem av heltene Big boss skal angripe;
+            var damage = Math.floor(Math.random() * 30) + 20; // Big boss dmg er fra 20 til 50 hp; 
+            
+            heroeHps[j] -= damage;
+            heroeHpBars[j].style.width = `${heroeHps[j]}px`;
+            describeAction("Big boss", damage, heroeNames[j]);
+        }
 
-
-
-
+        function describeAction(attacker, damage, target) {
+            if (attacker === "Big boss") {
+                statusTxt.innerHTML += `<p>${attacker} angriper ${target} og gjør ${damage} hp skade.</p>`; // I boss tilfelle legger til teksten til eksisterende. 
+            } else {
+                statusTxt.innerHTML = `<p>${attacker} angriper ${target} og gjør ${damage} hp skade.</p>`; // Nullstiller output fra forrige verdi.
+            }
+        }
         
     </script>
     
