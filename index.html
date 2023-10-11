@@ -70,6 +70,69 @@
 
     <script>
         // Her kommer din kode. Du kan også evt. velge å ha JS-koden i ekstern fil.
+
+        var statusTxt = document.getElementById("output-div");
+
+        var namelessKnight = document.getElementById("nameless-knight");
+        var julia = document.getElementById("julia-the-archer");
+        var cat = document.getElementById("the-cat");
+        var boss = document.getElementById("big-boss");
+
+        var bossHp = 300;
+
+
+        var knightHpBar = document.getElementById("nameless-knight-hp-div");
+        var juliaHpBar = document.getElementById("julia-the-archer-hp-div");
+        var catHpBar = document.getElementById("the-cat-hp-div");
+        var bossHpBar = document.getElementById("big-boss-hp-div");
+    
+
+        namelessKnight.onclick = function() {
+            attackMonsterKnight();
+        }
+
+        julia.onclick = function() {
+            attackMonsterJulia();
+        }
+
+        cat.onclick = function() {
+            attackMonsterCat();
+        }
+
+        function attackMonsterKnight() {
+            var damage = Math.floor(Math.random() * 40);
+            console.log(damage);
+            bossHp -= damage;
+            bossHpBar.style.width = `${bossHp}px`;
+            describeAction("knight", damage);
+        }
+
+        function attackMonsterJulia() {
+            var damage = Math.floor(Math.random() * 30);
+            console.log(damage);
+            bossHp -= damage;
+            bossHpBar.style.width = `${bossHp}px`;
+            describeAction("julia", damage);
+        }
+
+        function attackMonsterCat() {
+            var damage = Math.floor(Math.random() * 25);
+            console.log(damage);
+            bossHp -= damage;
+            bossHpBar.style.width = `${bossHp}px`;
+            describeAction("cat", damage);
+        }
+
+        function describeAction(attacker, damage) {
+            statusTxt.innerHTML = `${attacker} angrep bigBoss og gjorde ${damage} hp skade.`
+        }
+
+
+
+
+
+
+        
     </script>
     
 </body>
