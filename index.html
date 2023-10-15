@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="no">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,15 +9,16 @@
     <!-- Du trenger ikke gjøre noe med CSS-koden! -->
     <link rel="stylesheet" href="css-skal-ikke-roeres/index.css">
 </head>
+
 <body>
 
-    <div id="container">     
+    <div id="container">
 
         <!--
             Life bars 
             - For å endre på life bar må dere få tak i div etter id, for eksempel "nameless-knight-hp-div".                       
         -->
-        <div class="life-bar-container knight-container">     
+        <div class="life-bar-container knight-container">
             <img src="images/knight-head.png">
             <div class="life-bar" id="nameless-knight-hp-div"></div><!-- hp (Health Points) til ridderen -->
         </div>
@@ -39,7 +41,7 @@
 
         <!-- The knight -->
         <img id="nameless-knight" src="images/knight.png" alt="">
-       
+
         <!-- Julia the archer -->
         <img id="julia-the-archer" src="images/julia-the-archer.png">
 
@@ -77,9 +79,11 @@
         var julia = document.getElementById("julia-the-archer");
         var cat = document.getElementById("the-cat");
         var boss = document.getElementById("big-boss");
-        
+
+        var lumberJack = document.getElementById("jack-the-lumberjack");
+
         var monster = document.getElementById("appearing-monster");
-        
+
         var knightHpBar = document.getElementById("nameless-knight-hp-div");
         var juliaHpBar = document.getElementById("julia-the-archer-hp-div");
         var catHpBar = document.getElementById("the-cat-hp-div");
@@ -89,58 +93,85 @@
 
         var monsterNames = ["Slime", "Bat"];
         var summonedMonsters = [false, false];   // for å lagre info om slime (pos 0) eller bat (pos1) ble tilkalt.
-        
-        var heroeNames = ["NamelessKnight", "Julia the archer", "The Cat"];
+
+        var heroeNames = ["NamelessKnight", "Julia the archer", "The Cat", "Jack the Lumber"];
         var heroeNamesCur = ["NamelessKnight", "Julia the archer", "The Cat"];
-        var heroeHps = [200,200,200];   // lagrer hp til heltene i array. 
+        var heroeHps = [200, 200, 200];   // lagrer hp til heltene i array. 
         var heroeHpBars = [knightHpBar, juliaHpBar, catHpBar];   // lagrer variabler som peker til helter hp bar i array 
         var heroImages = [namelessKnight, julia, cat];
 
-        namelessKnight.onclick = function() {
-            if(summonedMonsters[0] || summonedMonsters[1]) {
+        var juliaArrows = 0;
+
+        lumberJack.onclick = function () {
+            makeArrows();
+        }
+
+        function makeArrows() {
+            var arrows = Math.floor(Math.random() * 5) + 1;
+            juliaArrows += arrows;
+            statusTxt.innerHTML = `<p>${heroeNames[3]} lagde ${arrows} til ${heroeNames[1]} </p>`;
+        }
+
+        namelessKnight.onclick = function () {
+            if (summonedMonsters[0] || summonedMonsters[1]) {
                 heroAttackMonster(heroeNames[0]);
             } else {
-                if(!summonMonster(heroeNames[0])) {
+                if (!summonMonster(heroeNames[0])) {
                     knightAttackBoss();
                 }
             }
-            setTimeout(function() {
+            setTimeout(function () {
                 bossAttackBack();
             }, 200);
         }
 
-        julia.onclick = function() {
-            if(summonedMonsters[0] || summonedMonsters[1]) {
-                heroAttackMonster(heroeNames[1]);
-            } else {   
-                if(!summonMonster(heroeNames[1])) {
-                    juliaAttackBoss();
+        julia.onclick = function () {
+            if (juliaArrows > 0) {
+                if (summonedMonsters[0] || summonedMonsters[1]) {
+                    heroAttackMonster(heroeNames[1]); //julia m
+                } else {
+                    if (!summonMonster(heroeNames[1])) { // hvis monster ikke dukker opp: Julie angriper boss
+                        juliaAttackBoss();
+                    }
                 }
+                statusTxt.style.backgroundColor = "green";
+                setTimeout(function () {
+                    statusTxt.style.backgroundColor = "white";
+                }, 1500);
+                statusTxt.innerHTML += `<p> ${heroeNames[1]} har ${juliaArrows} antall piler.</p>`;
+            } else {
+                statusTxt.innerHTML = `<p> ${heroeNames[1]} trenger flere piler fra ${heroeNames[3]} </p>`;
             }
-            setTimeout(function() {
+
+
+            setTimeout(function () {
                 bossAttackBack();
             }, 200);
+
+
         }
 
-        cat.onclick = function() {
-            if(summonedMonsters[0] || summonedMonsters[1]) {
+        cat.onclick = function () {
+            if (summonedMonsters[0] || summonedMonsters[1]) {
                 heroAttackMonster(heroeNames[2]);
-            } else {  
-                if(!summonMonster(heroeNames[2])) {
+            } else {
+                if (!summonMonster(heroeNames[2])) {
                     catAttackBoss();
                 }
             }
-            setTimeout(function() {
+            setTimeout(function () {
                 bossAttackBack();
             }, 200);
         }
 
+
+
         function knightAttackBoss() {
-            var damage = Math.floor(Math.random() * 15) + 10;   
+            var damage = Math.floor(Math.random() * 15) + 10;
             bossHp -= damage;
-            if(bossHp <= 0) {
+            if (bossHp <= 0) {
                 bossHp = 0;
-                setTimeout(function() {
+                setTimeout(function () {
                     alert("Du vant!");
                 }, 50);
             }
@@ -152,31 +183,36 @@
         function juliaAttackBoss() {
             var damage = Math.floor(Math.random() * 15) + 5;
             bossHp -= damage;
-            if(bossHp <= 0) {
-                statusTxt.innerHTML = `<p>Du nesten vant! Men ${heroeNames[2]} kan ikke drepe BigBoss. *tips - noen med øks?</p>`;
+            juliaArrows -= 1;
+            if (bossHp <= 0) {
+                statusTxt.innerHTML = `<p>Du vant nesten! Men ${heroeNames[2]} kan ikke drepe BigBoss. *tips - noen med øks?</p>`;
                 bossHp += damage;
                 return;
             }
+            
             bossHpBar.style.width = `${bossHp}px`;
             console.log(`BigBoss -> ${bossHp} hp`);
             describeAction(heroeNames[1], damage, "bigBoss");
         }
 
         function catAttackBoss() {
-            var damage = Math.floor(Math.random() * 26) + 3;
+            var random = Math.random();
+            console.log("Random attack: " + random)
+            var damage = Math.floor(random * 26) + 3;
+            console.log("Cat attack damage: " + damage);
             bossHp -= damage;
-            if(bossHp <= 0) {
-                statusTxt.innerHTML = `<p>Du nesten vant! Men ${heroeNames[2]} kan ikke drepe BigBoss. *tips - noen med øks?</p>`;
+            if (bossHp <= 0) {
+                statusTxt.innerHTML = `<p>Du vant nesten! Men ${heroeNames[2]} kan ikke drepe BigBoss. *tips - noen med øks?</p>`;
                 bossHp += damage;
                 return;
-            }   
+            }
             bossHpBar.style.width = `${bossHp}px`;
             console.log(`BigBoss -> ${bossHp} hp`);
             describeAction(heroeNames[2], damage, "bigBoss");
         }
 
         function summonMonster(attackerName) {
-            var chance = Math.random().toFixed(2);
+            var chance = Math.random().toFixed(2); //to desimaler
             console.log(`Sjansen for monster: ${chance}`);
             if (chance > 0.75) {
                 var monsterName = getMonsterName();
@@ -201,7 +237,7 @@
         }
 
         function heroAttackMonster(hero) {
-            if (summonedMonsters[0] && hero === heroeNames[2]) {
+            if (summonedMonsters[0] && hero === heroeNames[2]) { //hvis hero er cat og monster er
                 statusTxt.innerHTML = `<p>${hero} angriper ${monsterNames[0]} og ${monsterNames[0]} forlater BigBoss</p>`;
                 summonedMonsters[0] = false;
                 monster.src = ``;
@@ -209,7 +245,9 @@
                 statusTxt.innerHTML = `<p>${hero} angriper ${monsterNames[1]} og ${monsterNames[1]} forlater BigBoss</p>`;
                 summonedMonsters[1] = false;
                 monster.src = ``;
-            } else {
+                juliaArrows -= 1;
+
+            } else { //hvis hero som angriper ikke er cat eller julia
                 var monsterName = summonedMonsters[0] ? monsterNames[0] : monsterNames[1];
                 statusTxt.innerHTML = `<p>${hero} kan ikke angripe ${monsterName}, prøv angrep med annen helt</p>`;
             }
@@ -221,10 +259,10 @@
             var damage = Math.floor(Math.random() * 15) + 3; // Big boss dmg er fra 20 til 50 hp; `
 
             var i = 0;
-            while(heroeNames[i] !== heroeNamesCur[j]) i++;
-        
+            while (heroeNames[i] !== heroeNamesCur[j]) i++;
+
             heroeHps[i] -= damage;
-            if(heroeHps[i] <= 0) {
+            if (heroeHps[i] <= 0) {
                 heroeHps[i] = 0;
                 removeHero(i, j, damage);
             } else {
@@ -235,18 +273,18 @@
         }
 
         function removeHero(i, j, damage) {
-            statusTxt.innerHTML += `<p>Å nei! Helten ${heroeNames[i]} falt etter BigBoss gjorde ${damage} hp skade.</p>`; 
+            statusTxt.innerHTML += `<p>Å nei! Helten ${heroeNames[i]} falt etter BigBoss gjorde ${damage} hp skade.</p>`;
             heroImages[i].src = "";
-            
-            heroeNamesCur.splice(j,1);
+
+            heroeNamesCur.splice(j, 1); //fjerner den døde hero fra navnlista
             console.log(heroeNamesCur);
             if (heroeNamesCur.length < 1) {
-                setTimeout(function() {
+                setTimeout(function () {
                     alert("Du tapte :/");
                 }, 50);
             }
         }
-
+        //nederste linje tekstboks
         function describeAction(attacker, damage, target) {
             var action = `<p>${attacker} angriper ${target} og gjør ${damage} hp skade.</p>`;
             if (attacker === "Big boss") {
@@ -255,8 +293,9 @@
                 statusTxt.innerHTML = action; // Nullstiller output fra forrige verdi.
             }
         }
-        
+
     </script>
-    
+
 </body>
+
 </html>
