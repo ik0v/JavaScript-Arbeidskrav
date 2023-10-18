@@ -75,83 +75,121 @@
 
         var statusTxt = document.getElementById("output-div");
 
+        // Her henter vi bilder fra body og oppretter nye variabler for de.
+
         var namelessKnight = document.getElementById("nameless-knight");
         var julia = document.getElementById("julia-the-archer");
         var cat = document.getElementById("the-cat");
-        var boss = document.getElementById("big-boss");
-
         var lumberJack = document.getElementById("jack-the-lumberjack");
+        var healer = document.getElementById("william-the-healer");
 
+        var boss = document.getElementById("big-boss");
         var monster = document.getElementById("appearing-monster");
+
+        // Her henter vi hp bar til heltene og BigBoss fra body og oppretter nye variabler for de.
 
         var knightHpBar = document.getElementById("nameless-knight-hp-div");
         var juliaHpBar = document.getElementById("julia-the-archer-hp-div");
         var catHpBar = document.getElementById("the-cat-hp-div");
         var bossHpBar = document.getElementById("big-boss-hp-div");
 
-        var bossHp = 300;
+        var bossHp = 300; 
 
-        var monsterNames = ["Slime", "Bat"];
+        var monsterNames = ["Slime", "Bat"];    // for å lagre navner til monstrene. Ideelt sett kunne vi bytet dem kun her. 
         var summonedMonsters = [false, false];   // for å lagre info om slime (pos 0) eller bat (pos1) ble tilkalt.
 
-        var heroeNames = ["NamelessKnight", "Julia the archer", "The Cat", "Jack the Lumber"];
-        var heroeNamesCur = ["NamelessKnight", "Julia the archer", "The Cat"];
-        var heroeHps = [200, 200, 200];   // lagrer hp til heltene i array. 
-        var heroeHpBars = [knightHpBar, juliaHpBar, catHpBar];   // lagrer variabler som peker til helter hp bar i array 
-        var heroImages = [namelessKnight, julia, cat];
+        var heroeNames = ["NamelessKnight", "Julia the archer", "The Cat", "Jack the Lumber", "William the Healer"]; // lagrer navner til alle helter
+        var heroeNamesCur = ["NamelessKnight", "Julia the archer", "The Cat"];  // lagrer navner til helter som kan angripe BigBoss og forsvinner fra arrayen når de dør.
+        var heroeHps = [200, 200, 200];   // lagrer hp til heltene i array. Må ha samme lengde som heroeNamesCur array.
+        var heroeHpBars = [knightHpBar, juliaHpBar, catHpBar];   // lagrer variabler som peker til helter hp bar i array.  
+        var heroImages = [namelessKnight, julia, cat];  // lagrer variabler som peker til helter bilder. Vi kan fjerne bilder fra skjermen ved å sette deres src="".
 
         var juliaArrows = 0;
+        var healerActive = false;   // aktiv når man klikker på William the healer
 
-        lumberJack.onclick = function () {
+        lumberJack.onclick = function () {  // funksjon for å lage piler til Julia
             makeArrows();
         }
 
+        healer.onclick = function () {  // funksjon for å heale helter
+            document.body.style.cursor = 'url("images/healer2.png"), auto';    // bytter musepekkeren til et bilde av prest når man klikker på presten.
+            healerActive = true;                                              
+        }
+
+        function healHero(heroNr) {
+            if (heroeHps[heroNr] === 200) {             // tilfelle når helten allerede har full hp
+                statusTxt.innerHTML = `<p>${heroeNames[heroNr]} har full hp allerede</p>`;    // skriver ut beskjed om deti output
+            } else {
+                var healHp = Math.floor(Math.random() * 15) + 10;   // velger tilfeldig mengde hp (fra 10 til 24)
+                heroeHps[heroNr] += healHp;                         // oppdaterer helten hp med samme verdi     
+                if(heroeHps[heroNr] > 200) {                        // hvis det blir over 200 setter heltens hp til 200
+                    heroeHps[heroNr] = 200;                         
+                }
+                heroeHpBars[heroNr].style.width = `${heroeHps[heroNr]}px`;     // oppdaterer heltens hpBar på skjerm
+                statusTxt.innerHTML = `<p> ${heroeNames[4]} healer ${heroeNames[heroNr]} for ${healHp} hp</p>`;  // skriver det ut i output
+            }
+            document.body.style.cursor = "auto";    // bytter musepekeren til standard
+            healerActive = false;                   // setter status for presten til false
+        }
+
         function makeArrows() {
-            var arrows = Math.floor(Math.random() * 5) + 1;
+            var arrows = Math.floor(Math.random() * 8) + 2;   // bruker random funksjon for å lage fra 2 til 9 piler når man trykker på lumberjack.
             juliaArrows += arrows;
-            statusTxt.innerHTML = `<p>${heroeNames[3]} lagde ${arrows} til ${heroeNames[1]} </p>`;
+            statusTxt.innerHTML = `<p>${heroeNames[3]} lagde ${arrows} til ${heroeNames[1]}. 
+                ${heroeNames[1]} har nå ${juliaArrows} piler totalt.</p>`; // skriver output med antall piler lagd av lumberjack + antall piler totalt.
         }
 
         namelessKnight.onclick = function () {
-            if (summonedMonsters[0] || summonedMonsters[1]) {
-                heroAttackMonster(heroeNames[0]);
+            if (healerActive) {      // sjekker om presten er aktiv, altså vil heale helten
+                healHero(0);         // kaller på funksjon for å heale helten (sender nummer til helten)
+                return;              // i så fall blir ikke resten av kode i funksjonen utført (helten angriper ikke)   
+            }
+            if (summonedMonsters[0] || summonedMonsters[1]) {  // hvis en av monstrene fantes fra før.
+                heroAttackMonster(heroeNames[0]);              // helten angriper den (funksjon heroAttackMonster) i stedet for BigBoss.
             } else {
-                if (!summonMonster(heroeNames[0])) {
-                    knightAttackBoss();
+                if (!summonMonster(heroeNames[0])) {           // sjekker om monsteret ikke dukker opp (egen funksjon (25% sjanse).
+                    knightAttackBoss();                        // hvis monsteret ikke dukker opp angriper helten the BigBoss.          
                 }
             }
-            setTimeout(function () {
+            setTimeout(function () {                            // setter en pause på 200 miliSekund før BigBoss angriper helten tilbake.
                 bossAttackBack();
             }, 200);
         }
 
+        // Alle kommentarer fra funksjonen over gjelder 2 andre helter også. 
+
         julia.onclick = function () {
-            if (juliaArrows > 0) {
+            if (healerActive) {      // sjekker om presten er aktiv, altså vil heale helten
+                healHero(1);         // kaller på funksjon for å heale helten (sender nummer til helten)
+                return;              // i så fall blir ikke resten av kode i funksjonen utført (helten angriper ikke)   
+            }
+            if (juliaArrows > 0) {                              // sjekker om Julia har noen piler
                 if (summonedMonsters[0] || summonedMonsters[1]) {
-                    heroAttackMonster(heroeNames[1]); //julia m
+                    heroAttackMonster(heroeNames[1]); 
                 } else {
-                    if (!summonMonster(heroeNames[1])) { // hvis monster ikke dukker opp: Julie angriper boss
+                    if (!summonMonster(heroeNames[1])) {        // hvis monster ikke dukker opp: Julie angriper boss
                         juliaAttackBoss();
                     }
                 }
-                statusTxt.style.backgroundColor = "green";
+                statusTxt.style.backgroundColor = "green";      // hvis Julia kan angripe vi setter bakgrunnsfarge til grønn.
                 setTimeout(function () {
-                    statusTxt.style.backgroundColor = "white";
-                }, 1500);
-                statusTxt.innerHTML += `<p> ${heroeNames[1]} har ${juliaArrows} antall piler.</p>`;
+                    statusTxt.style.backgroundColor = "white";  // etter 1 sek setter bakgrunnsfarge tilbake til hvit.
+                }, 1000);
+                statusTxt.innerHTML += `<p> ${heroeNames[1]} har ${juliaArrows} antall piler.</p>`; // skriver i output om antall piler etter angrep.
             } else {
-                statusTxt.innerHTML = `<p> ${heroeNames[1]} trenger flere piler fra ${heroeNames[3]} </p>`;
+                statusTxt.innerHTML = `<p> ${heroeNames[1]} trenger flere piler fra ${heroeNames[3]} </p>`; // skriver i output at Julia trenger piler fra lumberjack.
             }
-
 
             setTimeout(function () {
                 bossAttackBack();
             }, 200);
-
-
         }
 
         cat.onclick = function () {
+            if (healerActive) {      // sjekker om presten er aktiv, altså vil heale helten
+                healHero(2);         // kaller på funksjon for å heale helten (sender nummer til helten)
+                return;              // i så fall blir ikke resten av kode i funksjonen utført (helten angriper ikke)   
+            }
             if (summonedMonsters[0] || summonedMonsters[1]) {
                 heroAttackMonster(heroeNames[2]);
             } else {
@@ -164,66 +202,62 @@
             }, 200);
         }
 
-
-
         function knightAttackBoss() {
-            var damage = Math.floor(Math.random() * 15) + 10;
-            bossHp -= damage;
-            if (bossHp <= 0) {
-                bossHp = 0;
-                setTimeout(function () {
-                    alert("Du vant!");
+            var damage = Math.floor(Math.random() * 20) + 20;   	// knight kan gjøre fra 20 til 39 hp skade mot BigBoss
+            bossHp -= damage;                     // trekker skade fra bigBossHp
+            if (bossHp <= 0) {                    // hvis bigBossHp etter angrep blir 0 eller negativ
+                bossHp = 0;                       // setter bigBossHp = 0. For at namelessKnight kan drepe BigBoss.
+                setTimeout(function () {            
+                    alert("Du vant!");            // gratulerer brukeren med seier i alert.
                 }, 50);
             }
-            bossHpBar.style.width = `${bossHp}px`;
-            console.log(`BigBoss -> ${bossHp} hp`);
-            describeAction(heroeNames[0], damage, "bigBoss");
+            bossHpBar.style.width = `${bossHp}px`;      // justerer bigBossHp
+            console.log(`BigBoss -> ${bossHp} hp`);     // logger bigBossHp i consolen
+            describeAction(heroeNames[0], damage, "bigBoss");   // beskriver angrep i output
         }
 
         function juliaAttackBoss() {
-            var damage = Math.floor(Math.random() * 15) + 5;
+            var damage = Math.floor(Math.random() * 7) + 1;
             bossHp -= damage;
-            juliaArrows -= 1;
-            if (bossHp <= 0) {
-                statusTxt.innerHTML = `<p>Du vant nesten! Men ${heroeNames[2]} kan ikke drepe BigBoss. *tips - noen med øks?</p>`;
-                bossHp += damage;
-                return;
+            juliaArrows -= 1;                       // Julia bruker 1 pil for å angripe BigBoss
+            if (bossHp <= 0) {                      // hvis bigBossHp etter angrep blir 0 eller negativ
+                statusTxt.innerHTML = `<p>Du vant nesten! Men ${heroeNames[1]} kan ikke drepe BigBoss. *tips - noen med øks?</p>`; // skriver i output at Julia kan ikke drepe BigBoss.
+                bossHp += damage;                   // BigBoss får tilbake hp skade som Julia har gjort fordi Julia klarer ikke å drepe ham.
+                return;                             // Vi returnerer fra funksjonen nå. Resten av kode i funskjonen blir ikke fullført i så fall.
             }
             
-            bossHpBar.style.width = `${bossHp}px`;
-            console.log(`BigBoss -> ${bossHp} hp`);
-            describeAction(heroeNames[1], damage, "bigBoss");
+            bossHpBar.style.width = `${bossHp}px`;      // justerer hp til BigBoss i body.
+            console.log(`BigBoss -> ${bossHp} hp`);     // logger bigBossHp i consolen
+            describeAction(heroeNames[1], damage, "bigBoss");   // beskriver angrep i output
         }
 
         function catAttackBoss() {
-            var random = Math.random();
-            console.log("Random attack: " + random)
-            var damage = Math.floor(random * 26) + 3;
+            var damage = Math.floor(Math.random() * 7) + 1;
             console.log("Cat attack damage: " + damage);
             bossHp -= damage;
             if (bossHp <= 0) {
                 statusTxt.innerHTML = `<p>Du vant nesten! Men ${heroeNames[2]} kan ikke drepe BigBoss. *tips - noen med øks?</p>`;
-                bossHp += damage;
-                return;
+                bossHp += damage;                   // BigBoss får tilbake hp skade som The Cat har gjort fordi the Cat klarer ikke å drepe ham
+                return;                             // Vi returnerer fra funksjonen nå. Resten av kode i funskjonen blir ikke fullført i så fall.
             }
-            bossHpBar.style.width = `${bossHp}px`;
-            console.log(`BigBoss -> ${bossHp} hp`);
-            describeAction(heroeNames[2], damage, "bigBoss");
+            bossHpBar.style.width = `${bossHp}px`;      // justerer hp til BigBoss i body.
+            console.log(`BigBoss -> ${bossHp} hp`);     // logger bigBossHp i consolen
+            describeAction(heroeNames[2], damage, "bigBoss");   // beskriver angrep i output
         }
 
         function summonMonster(attackerName) {
-            var chance = Math.random().toFixed(2); //to desimaler
-            console.log(`Sjansen for monster: ${chance}`);
-            if (chance > 0.75) {
-                var monsterName = getMonsterName();
-                monster.src = `images/${monsterName.toLowerCase()}.png`;
-                statusTxt.innerHTML = `<p>${attackerName} gikk til angrep på BigBoss, men! 
+            var chance = Math.random().toFixed(2);              // Generer flyttal, fra 0.00 til 0.99, to desimaler
+            console.log(`Sjansen for monster: ${chance}`);      // logger dette tallet i konsolen
+            if (chance < 0.25) {                                // hvis tallet er mindre enn 0.25 (25%)
+                var monsterName = getMonsterName();             // får navnet til monsteret i en egen funksjon
+                monster.src = `images/${monsterName.toLowerCase()}.png`;      // monsteret dukker opp på skjerm
+                statusTxt.innerHTML = `<p>${attackerName} gikk til angrep på BigBoss, men!     
                                        monster ${monsterName} ble tilkalt for å hjelpe BigBoss</p>`
-                return true;
-            } else return false;
+                return true;                    // returnerer true, monsteret ble tilkalt
+            } else return false;                // returnerer false
         }
 
-        function getMonsterName() {
+        function getMonsterName() {         // funksjon for å få navnet enten til Bat eller Slime (fra array)
             var chance = Math.random()
             console.log(chance);
             if (chance > 0.5) {
@@ -236,61 +270,72 @@
             }
         }
 
-        function heroAttackMonster(hero) {
-            if (summonedMonsters[0] && hero === heroeNames[2]) { //hvis hero er cat og monster er
+        function heroAttackMonster(hero) {                          // funksjon hvor helten angriper monster
+            if (summonedMonsters[0] && hero === heroeNames[2]) {    // kun hvis helten er Cat og monster er Slime kan Cat drepe monster Slime
                 statusTxt.innerHTML = `<p>${hero} angriper ${monsterNames[0]} og ${monsterNames[0]} forlater BigBoss</p>`;
-                summonedMonsters[0] = false;
-                monster.src = ``;
-            } else if (summonedMonsters[1] && hero === heroeNames[1]) {
+                summonedMonsters[0] = false;        // vi setter false for Slime i summonedMonster array.
+                monster.src = ``;                   // vi sletter bildet av Slime ved å sette src = "". 
+            } else if (summonedMonsters[1] && hero === heroeNames[1]) {    // kun hvis helten er Julia og monster er Bat kan Julia drepe monster Bat
                 statusTxt.innerHTML = `<p>${hero} angriper ${monsterNames[1]} og ${monsterNames[1]} forlater BigBoss</p>`;
-                summonedMonsters[1] = false;
-                monster.src = ``;
-                juliaArrows -= 1;
+                summonedMonsters[1] = false;        // vi setter false for Bat i summonedMonster array.
+                monster.src = ``;                   // vi sletter bildet av Bat ved å sette src = "".
+                juliaArrows -= 1;                   // reduserer antall pil med en.
 
-            } else { //hvis hero som angriper ikke er cat eller julia
-                var monsterName = summonedMonsters[0] ? monsterNames[0] : monsterNames[1];
+            } else {                                    //hvis helten som angriper monster ikke er den rette for å drepe Bat eller Slime.
+                var monsterName = summonedMonsters[0] ? monsterNames[0] : monsterNames[1];    // Wow, bruk av ternary operator. Samme som kode som er kommentert bort nede.
+
+                // var monsterName;
+                // if(summonedMonsters[0]) {
+                //     monsterName = monsterNames[0];
+                // } else {
+                //     monsterName = monsterNames[1];
+                // }
+
                 statusTxt.innerHTML = `<p>${hero} kan ikke angripe ${monsterName}, prøv angrep med annen helt</p>`;
             }
         }
 
         function bossAttackBack() {
-            var heroCount = heroeNamesCur.length;
-            var j = Math.floor(Math.random() * heroCount); // Velger hvem av heltene Big boss skal angripe;
-            var damage = Math.floor(Math.random() * 15) + 3; // Big boss dmg er fra 20 til 50 hp; `
+            var heroCount = heroeNamesCur.length;                   // array heroeNamesCur holder rede på antall helter som er i live
+            var heroNrCur = Math.floor(Math.random() * heroCount);  // Velger hvem av heltene Big boss skal angripe;
+            var damage = Math.floor(Math.random() * 20) + 8;        // Big boss dmg er fra 8 til 27 hp; `
 
-            var i = 0;
-            while (heroeNames[i] !== heroeNamesCur[j]) i++;
-
-            heroeHps[i] -= damage;
-            if (heroeHps[i] <= 0) {
-                heroeHps[i] = 0;
-                removeHero(i, j, damage);
-            } else {
-                describeAction("Big boss", damage, heroeNames[i]);
+            var heroNr = 0;                                              // innfører variabel i for å finne samme helt fra heroNames array, hvor vi ikke sletter de døde heltene.
+            while (heroeNames[heroNr] !== heroeNamesCur[heroNrCur]) {    // looper gjennom heroeNames array for å finne samme helt (heroeNames og heroeNamesCur)
+                heroNr++;                                                // heroeNames array må bli brukt for å ikke omrokkere heroeNamesCur (når en dør)
             }
-            console.log(`${heroeNames[i]} -> ${heroeHps[i]} hp`);
-            heroeHpBars[i].style.width = `${heroeHps[i]}px`;
+
+            heroeHps[heroNr] -= damage;                     // trekker skade fra heltens hp
+            if (heroeHps[heroNr] <= 0) {                    // hvis helten dør
+                heroeHps[heroNr] = 0;                       // setter hp lik 0
+                removeHero(heroNr, heroNrCur, damage);      // fjerner helten fra array heroeNamesCur
+            } else {
+                describeAction("Big boss", damage, heroeNames[heroNr]);    // hvis helten overlever angrep
+            }
+            console.log(`${heroeNames[heroNr]} -> ${heroeHps[heroNr]} hp`);     // logger heltens aktuell hp etter angrep
+            heroeHpBars[heroNr].style.width = `${heroeHps[heroNr]}px`;          // oppdaterer heltens hp bar på skjerm
         }
 
-        function removeHero(i, j, damage) {
-            statusTxt.innerHTML += `<p>Å nei! Helten ${heroeNames[i]} falt etter BigBoss gjorde ${damage} hp skade.</p>`;
-            heroImages[i].src = "";
+        function removeHero(heroNr, heroNrCur, damage) {                        // funksjon for å fjerne helt
+            statusTxt.innerHTML += `<p>Å nei! Helten ${heroeNames[heroNr]} døde etter BigBoss gjorde ${damage} hp skade.</p>`;  // skriver i output
+            heroImages[heroNr].src = "";                    // fjerner heltens bildet fra skjerm
 
-            heroeNamesCur.splice(j, 1); //fjerner den døde hero fra navnlista
-            console.log(heroeNamesCur);
-            if (heroeNamesCur.length < 1) {
+            heroeNamesCur.splice(heroNrCur, 1);             // fjerner den døde helten fra navnelista 
+            console.log(heroeNamesCur);                     // logger heroeNamesCur i konsolen for å sjekke om helten ble fjernet 
+            if (heroeNamesCur.length < 1) {                 // hvis lista er tom, altså det var siste helten i live
                 setTimeout(function () {
-                    alert("Du tapte :/");
+                    alert("Du tapte :/");                   // avslutter spillet. Bruker setTimeout for at programmet rekker å fjerne bildet og oppdatere hpBar på skjerm.
                 }, 50);
             }
         }
+
         //nederste linje tekstboks
         function describeAction(attacker, damage, target) {
             var action = `<p>${attacker} angriper ${target} og gjør ${damage} hp skade.</p>`;
             if (attacker === "Big boss") {
-                statusTxt.innerHTML += action; // I boss tilfelle legger til teksten til eksisterende. 
+                statusTxt.innerHTML += action;  // I boss tilfelle legger til teksten til eksisterende. 
             } else {
-                statusTxt.innerHTML = action; // Nullstiller output fra forrige verdi.
+                statusTxt.innerHTML = action;   // Nullstiller output fra forrige verdi.
             }
         }
 
